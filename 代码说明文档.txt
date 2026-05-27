@@ -1,0 +1,363 @@
+================================================================================
+              拼豆商城 —— 代码说明文档
+              技术栈：Spring Boot 2.7 + MyBatis-Plus + Vue3 + Element Plus
+================================================================================
+
+
+一、项目概述
+================================================================================
+
+  项目名称：拼豆商城
+  项目描述：一个二次元拼豆手工艺品电商平台
+  
+  技术架构：前后端分离
+    - 后端：Spring Boot 2.7.18 + MyBatis-Plus 3.5.5 + MySQL 8.0
+    - 前端：Vue 3 + Vite + Element Plus + Vue Router 4 + Pinia
+    - 认证：JWT (JSON Web Token)
+    - 密码加密：MD5 (Hutool)
+
+
+二、项目目录结构
+================================================================================
+
+  拼豆商城/
+  │
+  ├── pindou-backend/                 # 后端项目（Spring Boot）
+  │   ├── pom.xml                     # Maven 依赖配置
+  │   └── src/main/
+  │       ├── java/com/pindou/
+  │       │   ├── PindouApplication.java    # 启动类（程序入口）
+  │       │   ├── common/
+  │       │   │   ├── Result.java           # 统一响应封装
+  │       │   │   └── Constants.java        # 常量定义
+  │       │   ├── config/
+  │       │   │   ├── WebConfig.java        # 跨域配置 + 拦截器注册
+  │       │   │   ├── JwtInterceptor.java   # JWT 认证拦截器
+  │       │   │   └── MybatisPlusConfig.java # 分页插件 + 自动填充
+  │       │   ├── controller/               # 控制器层（处理HTTP请求）
+  │       │   │   ├── UserController.java       # 用户相关接口
+  │       │   │   ├── ProductController.java    # 商品相关接口
+  │       │   │   ├── CategoryController.java   # 分类相关接口
+  │       │   │   ├── CartController.java       # 购物车相关接口
+  │       │   │   ├── OrderController.java      # 订单相关接口
+  │       │   │   ├── ReviewController.java     # 评价相关接口
+  │       │   │   ├── BannerController.java     # 轮播图相关接口
+  │       │   │   ├── AddressController.java    # 收货地址相关接口
+  │       │   │   └── FileController.java       # 文件上传接口
+  │       │   ├── entity/                   # 实体类（对应数据库表）
+  │       │   │   ├── User.java         # 用户
+  │       │   │   ├── Product.java      # 商品
+  │       │   │   ├── Category.java     # 分类
+  │       │   │   ├── Cart.java         # 购物车
+  │       │   │   ├── Order.java        # 订单
+  │       │   │   ├── OrderItem.java    # 订单详情
+  │       │   │   ├── Review.java       # 评价
+  │       │   │   ├── Banner.java       # 轮播图
+  │       │   │   └── Address.java      # 收货地址
+  │       │   ├── mapper/               # 数据访问层（操作数据库）
+  │       │   │   ├── UserMapper.java
+  │       │   │   ├── ProductMapper.java
+  │       │   │   ├── CategoryMapper.java
+  │       │   │   ├── CartMapper.java
+  │       │   │   ├── OrderMapper.java
+  │       │   │   ├── OrderItemMapper.java
+  │       │   │   ├── ReviewMapper.java
+  │       │   │   ├── BannerMapper.java
+  │       │   │   └── AddressMapper.java
+  │       │   └── utils/
+  │       │       └── JwtUtils.java     # JWT 工具类
+  │       └── resources/
+  │           ├── application.yml       # 应用配置文件
+  │           └── pindou_mall.sql       # 数据库初始化脚本
+  │
+  ├── pindou-frontend/                # 前端项目（Vue 3）
+  │   ├── index.html                  # HTML 入口
+  │   ├── package.json                # 前端依赖配置
+  │   ├── vite.config.js              # Vite 构建配置（含代理）
+  │   └── src/
+  │       ├── main.js                 # 前端入口文件
+  │       ├── App.vue                 # 根组件
+  │       ├── api/
+  │       │   ├── request.js          # Axios 封装（请求/响应拦截）
+  │       │   └── index.js            # 所有 API 接口定义
+  │       ├── router/
+  │       │   └── index.js            # 路由配置（页面路径映射）
+  │       ├── store/
+  │       │   └── user.js             # Pinia 用户状态管理
+  │       ├── assets/css/
+  │       │   └── global.css          # 全局样式（主题色、字体等）
+  │       ├── views/                  # 前台页面
+  │       │   ├── Layout.vue          # 前台布局（导航栏+底部）
+  │       │   ├── Home.vue            # 首页（轮播+分类+推荐）
+  │       │   ├── Login.vue           # 登录页
+  │       │   ├── Register.vue        # 注册页
+  │       │   ├── Products.vue        # 商品列表页
+  │       │   ├── ProductDetail.vue   # 商品详情页
+  │       │   ├── Cart.vue            # 购物车页
+  │       │   ├── Checkout.vue        # 结算页
+  │       │   ├── Orders.vue          # 订单列表页
+  │       │   └── Profile.vue         # 个人中心页
+  │       └── views/admin/            # 后台管理页面
+  │           ├── AdminLayout.vue     # 后台布局（侧边栏）
+  │           ├── Dashboard.vue       # 数据概览
+  │           ├── ProductManage.vue   # 商品管理
+  │           ├── CategoryManage.vue  # 分类管理
+  │           ├── OrderManage.vue     # 订单管理
+  │           ├── UserManage.vue      # 用户管理
+  │           └── BannerManage.vue    # 轮播图管理
+  │
+  ├── 测试账号.txt                    # 测试账号密码
+  ├── 部署启动教程.txt                # 部署启动指南
+  ├── 代码说明文档.txt                # 本文件
+  └── README.md                       # 项目说明
+
+
+三、数据库设计（共 9 张表）
+================================================================================
+
+  1. users（用户表）
+     - id: 主键自增
+     - username: 用户名（唯一）
+     - password: 密码（MD5加密存储）
+     - nickname: 昵称
+     - avatar: 头像URL
+     - phone: 手机号
+     - email: 邮箱
+     - role: 角色（USER普通用户 / ADMIN管理员）
+     - status: 状态（1启用 / 0禁用）
+     - create_time, update_time: 创建/更新时间
+
+  2. categories（商品分类表）
+     - id, name(分类名), icon(图标), sort_order(排序), status
+
+  3. products（商品表）
+     - id, name(商品名), category_id(分类ID), price(售价),
+       original_price(原价), stock(库存), sales(销量),
+       main_image(主图), images(多图), description(简介),
+       detail(富文本详情), ip_series(IP系列), character_name(角色),
+       status(1上架/0下架), is_hot(热门), is_new(新品), view_count(浏览量)
+
+  4. carts（购物车表）
+     - id, user_id, product_id, quantity(数量), checked(是否选中)
+
+  5. orders（订单表）
+     - id, order_no(订单号), user_id, total_amount(总金额),
+       status(0待付款/1已付款/2已发货/3已完成/4已取消),
+       address(收货地址), phone, receiver(收货人), remark(备注)
+
+  6. order_items（订单详情表）
+     - id, order_id, product_id, product_name, product_image, price, quantity
+
+  7. reviews（评价表）
+     - id, user_id, product_id, order_id, content(评价内容),
+       rating(评分1-5), images(评价图片)
+
+  8. banners（轮播图表）
+     - id, title(标题), image(图片), url(链接), sort_order, status
+
+  9. addresses（收货地址表）
+     - id, user_id, receiver, phone, province, city, district, detail, is_default
+
+
+四、后端 API 接口说明
+================================================================================
+
+  基础路径：http://localhost:8080
+
+  【用户模块 /api/user】
+  ┌─────────┬────────────────────┬────────────────────────┐
+  │  方法   │       路径         │         说明           │
+  ├─────────┼────────────────────┼────────────────────────┤
+  │  POST   │ /api/user/register │ 用户注册               │
+  │  POST   │ /api/user/login    │ 用户登录（返回JWT）    │
+  │  GET    │ /api/user/info     │ 获取当前用户信息       │
+  │  PUT    │ /api/user/update   │ 修改个人信息           │
+  │  PUT    │ /api/user/password │ 修改密码               │
+  │  GET    │ /api/user/list     │ [管理]用户列表(分页)   │
+  │  PUT    │ /api/user/status/{id} │ [管理]禁用/启用用户 │
+  └─────────┴────────────────────┴────────────────────────┘
+
+  【商品模块 /api/product】
+  ┌─────────┬──────────────────────────┬──────────────────┐
+  │  方法   │         路径             │       说明       │
+  ├─────────┼──────────────────────────┼──────────────────┤
+  │  GET    │ /api/product/list        │ 商品列表(分页)   │
+  │  GET    │ /api/product/detail/{id} │ 商品详情         │
+  │  GET    │ /api/product/hot         │ 热门商品         │
+  │  GET    │ /api/product/new         │ 新品商品         │
+  │  GET    │ /api/product/search      │ 搜索商品         │
+  │  GET    │ /api/product/admin/list  │ [管理]商品列表   │
+  │  POST   │ /api/product/add         │ [管理]添加商品   │
+  │  PUT    │ /api/product/update      │ [管理]编辑商品   │
+  │  DELETE │ /api/product/delete/{id} │ [管理]删除商品   │
+  │  PUT    │ /api/product/status/{id} │ [管理]上下架     │
+  └─────────┴──────────────────────────┴──────────────────┘
+
+  【购物车模块 /api/cart】
+  ┌─────────┬──────────────────────┬──────────────────┐
+  │  GET    │ /api/cart/list        │ 购物车列表       │
+  │  POST   │ /api/cart/add         │ 添加到购物车     │
+  │  PUT    │ /api/cart/update      │ 修改数量/选中    │
+  │  DELETE │ /api/cart/delete/{id} │ 删除购物车项     │
+  │  DELETE │ /api/cart/clear       │ 清空购物车       │
+  └─────────┴──────────────────────┴──────────────────┘
+
+  【订单模块 /api/order】
+  ┌─────────┬────────────────────────────┬────────────────┐
+  │  POST   │ /api/order/create          │ 创建订单       │
+  │  GET    │ /api/order/list            │ 我的订单列表   │
+  │  GET    │ /api/order/detail/{id}     │ 订单详情       │
+  │  PUT    │ /api/order/pay/{id}        │ 支付订单       │
+  │  PUT    │ /api/order/cancel/{id}     │ 取消订单       │
+  │  PUT    │ /api/order/confirm/{id}    │ 确认收货       │
+  │  GET    │ /api/order/admin/list      │ [管理]订单列表 │
+  │  PUT    │ /api/order/admin/ship/{id} │ [管理]发货     │
+  │  GET    │ /api/order/admin/stats     │ [管理]统计数据 │
+  └─────────┴────────────────────────────┴────────────────┘
+
+  【其他模块】
+  ┌─────────┬────────────────────────────┬────────────────┐
+  │  GET    │ /api/category/list         │ 分类列表       │
+  │  GET    │ /api/banner/list           │ 轮播图列表     │
+  │  GET    │ /api/review/list/{pid}     │ 商品评价列表   │
+  │  POST   │ /api/review/add            │ 添加评价       │
+  │  GET    │ /api/address/list          │ 收货地址列表   │
+  │  POST   │ /api/file/upload           │ 文件上传       │
+  └─────────┴────────────────────────────┴────────────────┘
+
+
+五、前端页面说明
+================================================================================
+
+  【前台页面（普通用户）】
+  
+  1. 首页 (Home.vue)
+     - 轮播图展示（从数据库 banners 表获取）
+     - 8个商品分类导航（点击跳转到对应分类列表）
+     - 热门推荐商品展示（is_hot=1 的商品）
+     - 新品上线商品展示（is_new=1 的商品）
+
+  2. 商品列表 (Products.vue)
+     - 分类标签筛选
+     - 商品卡片网格展示
+     - 分页加载
+
+  3. 商品详情 (ProductDetail.vue)
+     - 商品图片展示（支持多图切换）
+     - 商品信息（价格、库存、销量、IP系列、角色标签）
+     - 数量选择 + 加入购物车 / 立即购买
+     - 商品详情（富文本HTML渲染）
+     - 商品评价列表（带评分星级）
+
+  4. 购物车 (Cart.vue)
+     - 商品列表（图片、名称、价格、数量调整）
+     - 单选/全选功能
+     - 实时计算总价
+     - 删除/清空功能
+     - 去结算按钮
+
+  5. 结算 (Checkout.vue)
+     - 填写收货信息（收货人、电话、地址、备注）
+     - 商品清单确认
+     - 提交订单
+
+  6. 订单 (Orders.vue)
+     - 5个状态Tab切换（全部/待付款/已付款/已发货/已完成）
+     - 订单卡片（订单号、商品、金额、状态）
+     - 操作按钮（支付/取消/确认收货/评价）
+
+  7. 个人中心 (Profile.vue)
+     - 基本信息修改（昵称、手机、邮箱）
+     - 修改密码
+     - 收货地址管理（增删改 + 设默认）
+
+  【后台页面（管理员）】
+
+  8. 数据概览 (Dashboard.vue)
+     - 4个统计卡片：总订单、已支付订单、注册用户、商品总数
+     - 数据来自真实数据库查询
+
+  9. 商品管理 (ProductManage.vue)
+     - 搜索 + 分类筛选
+     - 商品表格（ID、图片、名称、分类、价格、库存、销量）
+     - 上下架开关
+     - 添加/编辑弹窗（支持图片上传）
+     - 删除功能
+     - 分页
+
+  10. 分类管理 (CategoryManage.vue)
+      - 分类表格 + 添加/编辑/删除
+
+  11. 订单管理 (OrderManage.vue)
+      - 订单号搜索 + 状态筛选
+      - 订单表格 + 发货操作
+
+  12. 用户管理 (UserManage.vue)
+      - 用户搜索 + 表格
+      - 禁用/启用用户
+
+  13. 轮播图管理 (BannerManage.vue)
+      - 轮播图表格 + 添加/编辑/删除
+      - 支持图片上传
+
+
+六、核心业务流程
+================================================================================
+
+  【下单流程】
+  用户浏览商品 → 加入购物车 → 勾选商品 → 去结算
+  → 填写收货信息 → 提交订单 → 系统创建订单
+  → 自动扣减库存、增加销量、清除购物车已选商品
+  → 用户支付 → 管理员发货 → 用户确认收货 → 可以评价
+
+  【认证流程】
+  用户登录 → 后端验证账密 → 生成JWT Token → 返回给前端
+  → 前端存储Token到localStorage → 后续请求在Header中携带Token
+  → 后端拦截器验证Token → 从Token中获取用户ID和角色
+
+  【数据流】
+  前端按钮点击 → 调用API函数(api/index.js) → Axios发HTTP请求
+  → 后端Controller接收 → 调用Mapper操作数据库 → 返回Result
+  → Axios拦截器处理响应 → 前端更新页面数据
+
+
+七、关键配置文件说明
+================================================================================
+
+  【后端 application.yml】
+  - server.port: 后端端口（默认8080）
+  - spring.datasource: 数据库连接信息（URL、用户名、密码）
+  - mybatis-plus: MyBatis-Plus配置（Mapper路径、驼峰映射等）
+  - jwt.secret: JWT加密密钥
+  - jwt.expiration: Token过期时间（毫秒，默认24小时）
+  - file.upload-path: 文件上传存储路径
+
+  【前端 vite.config.js】
+  - server.port: 前端端口（默认5173）
+  - server.proxy: 代理配置（将/api请求转发到后端8080）
+
+
+八、项目依赖说明
+================================================================================
+
+  【后端主要依赖（pom.xml）】
+  - spring-boot-starter-web: Web框架
+  - mybatis-plus-boot-starter: ORM框架（简化数据库操作）
+  - mysql-connector-java: MySQL驱动
+  - lombok: 简化Java代码（自动生成getter/setter等）
+  - jjwt: JWT令牌生成和验证
+  - hutool-all: Java工具库（MD5加密等）
+
+  【前端主要依赖（package.json）】
+  - vue: 前端框架
+  - vue-router: 路由管理
+  - pinia: 状态管理
+  - axios: HTTP请求库
+  - element-plus: UI组件库
+  - @element-plus/icons-vue: 图标库
+  - @wangeditor/editor: 富文本编辑器（商品详情编辑）
+
+
+================================================================================
+                       代码说明文档 —— 完 🎨
+================================================================================
